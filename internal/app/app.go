@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/NailUsmanov/linkchecker11_11_2025/internal/handler"
+	"github.com/NailUsmanov/linkchecker11_11_2025/internal/storage"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 )
@@ -13,13 +14,13 @@ import (
 // App - состоит из маршуртизатора chi, храншлища, логгера.
 type App struct {
 	router  *chi.Mux
-	storage handler.Storage
+	storage storage.Storage
 	sugar   *zap.SugaredLogger
 }
 
 // NewApp - создадим новую стркутуру Арр.
 // В ней регистрируем маршруты.
-func NewApp(s handler.Storage, sugar *zap.SugaredLogger) *App {
+func NewApp(s storage.Storage, sugar *zap.SugaredLogger) *App {
 	r := chi.NewRouter()
 	app := &App{
 		router:  r,

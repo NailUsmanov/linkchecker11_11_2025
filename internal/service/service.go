@@ -45,7 +45,7 @@ func CheckLink(ctx context.Context, link string) (bool, error) {
 	}
 
 	// Формирую запрос через вызов HEAD
-	req, err := http.NewRequest(http.MethodHead, u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, u.String(), nil)
 	if err != nil {
 		return false, err
 	}

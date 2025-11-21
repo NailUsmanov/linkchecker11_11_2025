@@ -25,7 +25,10 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	// хранилище для ссылок
-	store := storage.NewMemoryStorage()
+	store, err := storage.NewFileStorage("data.json")
+	if err != nil {
+		sugar.Fatalf("create file storage failed: %v", err)
+	}
 
 	// создаем арр
 	applictaion := app.NewApp(store, sugar)

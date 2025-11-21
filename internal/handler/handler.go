@@ -8,6 +8,7 @@ import (
 
 	"github.com/NailUsmanov/linkchecker11_11_2025/internal/models"
 	"github.com/NailUsmanov/linkchecker11_11_2025/internal/service"
+	"github.com/NailUsmanov/linkchecker11_11_2025/internal/storage"
 	"go.uber.org/zap"
 )
 
@@ -20,7 +21,7 @@ func NextReqNum() uint64 {
 }
 
 // NewCreateLinks - проверяет и сохраняет переданные в запросе ссылки.
-func NewCreateLinks(s Storage, sugar *zap.SugaredLogger) http.HandlerFunc {
+func NewCreateLinks(s storage.Storage, sugar *zap.SugaredLogger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Проверим метод
 		if r.Method != http.MethodPost {
@@ -61,15 +62,13 @@ func NewCreateLinks(s Storage, sugar *zap.SugaredLogger) http.HandlerFunc {
 
 		for _, v := range req.Links {
 			stat, err := service.CheckLink(r.Context(), v)
-			if err != nil {
-				sugar.Errorf("checklink failed: %v", err)
-				http.Error(w, "checklink failed", http.StatusInternalServerError)
-				return
-			}
-
 			statusStr := "not available"
-			if stat {
-				statusStr = "available"
+
+			if err != nil {
+				// Линку не смогли проверить — считаем недоступной, идем дальше
+				sugar.Warnf("checklink failed: %v", err)
+			} else if stat {
+				statusStr = "avaivable"
 			}
 			resp.Links[v] = statusStr
 		}
@@ -92,7 +91,7 @@ func NewCreateLinks(s Storage, sugar *zap.SugaredLogger) http.HandlerFunc {
 }
 
 // NewGetLinks - выдает пользователю PDF файл по конкретному номеру запроса с уже проверенными ссылками.
-func NewGetLinks(s Storage, sugar *zap.SugaredLogger) http.HandlerFunc {
+func NewGetLinks(s storage.Storage, sugar *zap.SugaredLogger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Проверяю метод
 		if r.Method != http.MethodGet {
